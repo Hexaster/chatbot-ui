@@ -66,20 +66,25 @@ export const useChatHandler = () => {
     models,
     isPromptPickerOpen,
     isFilePickerOpen,
-    isToolPickerOpen
+    isToolPickerOpen,
+    isOneMore
   } = useContext(ChatbotUIContext)
 
+  // point to the <textarea> input box where the user types
+  // It’s currently null, but once the component renders, it will connect to the DOM element
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
-
+  // If none of the pickers are opened, focus on the textarea again
   useEffect(() => {
     if (!isPromptPickerOpen || !isFilePickerOpen || !isToolPickerOpen) {
       chatInputRef.current?.focus()
     }
   }, [isPromptPickerOpen, isFilePickerOpen, isToolPickerOpen])
 
+  // What happens if the user creates a new chat
   const handleNewChat = async () => {
     if (!selectedWorkspace) return
 
+    // Initialise everything
     setUserInput("")
     setChatMessages([])
     setSelectedChat(null)
@@ -99,6 +104,7 @@ export const useChatHandler = () => {
     setSelectedTools([])
     setToolInUse("none")
 
+    // If an assistant is selected, load it
     if (selectedAssistant) {
       setChatSettings({
         model: selectedAssistant.model as LLMID,
@@ -143,7 +149,9 @@ export const useChatHandler = () => {
       )
 
       if (allFiles.length > 0) setShowFilesDisplay(true)
-    } else if (selectedPreset) {
+    }
+    // If a preset is set, load it
+    else if (selectedPreset) {
       setChatSettings({
         model: selectedPreset.model as LLMID,
         prompt: selectedPreset.prompt,
@@ -190,21 +198,22 @@ export const useChatHandler = () => {
 
   const handleSendMessage = async (
     messageContent: string,
-    chatMessages: ChatMessage[],
-    isRegeneration: boolean
+    chatMessages: ChatMessage[], // Chat history
+    isRegeneration: boolean // whether a re-sent or not
   ) => {
     const startingInput = messageContent
 
     try {
-      setUserInput("")
-      setIsGenerating(true)
-      setIsPromptPickerOpen(false)
+      setUserInput("") // clear input box
+      setIsGenerating(true) // Tell UI that AI is now "thinking" (show loading spinner etc.)
+      setIsPromptPickerOpen(false) //
       setIsFilePickerOpen(false)
       setNewMessageImages([])
 
       const newAbortController = new AbortController()
       setAbortController(newAbortController)
 
+      // Find the model the user is using
       const modelData = [
         ...models.map(model => ({
           modelId: model.model_id as LLMID,
@@ -213,10 +222,10 @@ export const useChatHandler = () => {
           hostedId: model.id,
           platformLink: "",
           imageInput: false
-        })),
-        ...LLM_LIST,
-        ...availableLocalModels,
-        ...availableOpenRouterModels
+        })), // custom models
+        ...LLM_LIST, // build-in models
+        ...availableLocalModels, // local models
+        ...availableOpenRouterModels //open router models
       ].find(llm => llm.modelId === chatSettings?.model)
 
       validateChatSettings(
@@ -229,10 +238,10 @@ export const useChatHandler = () => {
 
       let currentChat = selectedChat ? { ...selectedChat } : null
 
+      // Preparation for fetching images and files
       const b64Images = newMessageImages.map(image => image.base64)
-
       let retrievedFileItems: Tables<"file_items">[] = []
-
+      // Fetching images and files if needed
       if (
         (newMessageFiles.length > 0 || chatFiles.length > 0) &&
         useRetrieval
@@ -247,7 +256,7 @@ export const useChatHandler = () => {
           sourceCount
         )
       }
-
+      // temp place holders for messages
       const { tempUserChatMessage, tempAssistantChatMessage } =
         createTempMessages(
           messageContent,
@@ -280,7 +289,6 @@ export const useChatHandler = () => {
           profile!,
           chatImages
         )
-
         const response = await fetch("/api/chat/tools", {
           method: "POST",
           headers: {
@@ -292,7 +300,6 @@ export const useChatHandler = () => {
             selectedTools
           })
         })
-
         setToolInUse("none")
 
         generatedText = await processResponse(
@@ -333,11 +340,13 @@ export const useChatHandler = () => {
             setIsGenerating,
             setFirstTokenReceived,
             setChatMessages,
-            setToolInUse
+            setToolInUse,
+            isOneMore
           )
         }
       }
 
+      // If currentChat is null -> it is a brand new chat
       if (!currentChat) {
         currentChat = await handleCreateChat(
           chatSettings!,
@@ -350,11 +359,15 @@ export const useChatHandler = () => {
           setChats,
           setChatFiles
         )
-      } else {
+      }
+      // Otherwise, it is an existing chat
+      else {
+        // update the timestamp
         const updatedChat = await updateChat(currentChat.id, {
           updated_at: new Date().toISOString()
         })
 
+        // Replace the chat in context with the latest version
         setChats(prevChats => {
           const updatedChats = prevChats.map(prevChat =>
             prevChat.id === updatedChat.id ? updatedChat : prevChat
@@ -364,6 +377,7 @@ export const useChatHandler = () => {
         })
       }
 
+      // Create messages in database
       await handleCreateMessages(
         chatMessages,
         currentChat,
@@ -379,7 +393,7 @@ export const useChatHandler = () => {
         setChatImages,
         selectedAssistant
       )
-
+      // Cleaning up UI state
       setIsGenerating(false)
       setFirstTokenReceived(false)
     } catch (error) {

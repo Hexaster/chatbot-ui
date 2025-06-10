@@ -2,7 +2,12 @@ import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { ChatbotUIContext } from "@/context/context"
 import { createFolder } from "@/db/folders"
 import { ContentType } from "@/types"
-import { IconFolderPlus, IconPlus } from "@tabler/icons-react"
+import {
+  IconFolderPlus,
+  IconPlus,
+  IconHierarchy,
+  IconSearch
+} from "@tabler/icons-react"
 import { FC, useContext, useState } from "react"
 import { Button } from "../ui/button"
 import { CreateAssistant } from "./items/assistants/create-assistant"
@@ -12,6 +17,7 @@ import { CreateModel } from "./items/models/create-model"
 import { CreatePreset } from "./items/presets/create-preset"
 import { CreatePrompt } from "./items/prompts/create-prompt"
 import { CreateTool } from "./items/tools/create-tool"
+import { useParams, useRouter } from "next/navigation"
 
 interface SidebarCreateButtonsProps {
   contentType: ContentType
@@ -22,6 +28,7 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   contentType,
   hasData
 }) => {
+  const router = useRouter()
   const { profile, selectedWorkspace, folders, setFolders } =
     useContext(ChatbotUIContext)
   const { handleNewChat } = useChatHandler()
@@ -95,20 +102,41 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
     }
   }
 
+  const params = useParams() as { locale?: string; workspaceid?: string }
+  const { locale, workspaceid } = params
+
+  const openKG = () => {
+    router.push(`/${locale}/${workspaceid}/graph`)
+    return
+  }
+
+  const openSearch = () => {
+    router.push(`/${locale}/${workspaceid}/search`)
+    return
+  }
+
   return (
     <div className="flex w-full space-x-2">
       <Button className="flex h-[36px] grow" onClick={getCreateFunction()}>
         <IconPlus className="mr-1" size={20} />
-        New{" "}
+        {/* New{" "}
         {contentType.charAt(0).toUpperCase() +
-          contentType.slice(1, contentType.length - 1)}
+          contentType.slice(1, contentType.length - 1)} */}
       </Button>
 
       {hasData && (
-        <Button className="size-[36px] p-1" onClick={handleCreateFolder}>
+        <Button className="flex h-[36px] grow" onClick={handleCreateFolder}>
           <IconFolderPlus size={20} />
         </Button>
       )}
+
+      <Button className="flex h-[36px] grow" onClick={openKG}>
+        <IconHierarchy className="mr-1" size={20} />
+      </Button>
+
+      <Button className="flex h-[36px] grow" onClick={openSearch}>
+        <IconSearch className="mr-1" size={20} />
+      </Button>
 
       {isCreatingPrompt && (
         <CreatePrompt

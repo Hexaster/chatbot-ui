@@ -5,6 +5,7 @@ import mammoth from "mammoth"
 import { useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 
+// supported file types, can be extended
 export const ACCEPTED_FILE_TYPES = [
   "text/csv",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

@@ -6,7 +6,8 @@ import {
   IconBolt,
   IconCirclePlus,
   IconPlayerStopFilled,
-  IconSend
+  IconSend,
+  IconMessagePlus
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -31,6 +32,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
   })
 
   const [isTyping, setIsTyping] = useState<boolean>(false)
+  //const [isOneMore, setIsOneMore] = useState<boolean>(false)
 
   const {
     isAssistantPickerOpen,
@@ -54,7 +56,9 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     chatSettings,
     selectedTools,
     setSelectedTools,
-    assistantImages
+    assistantImages,
+    isOneMore,
+    setIsOneMore
   } = useContext(ChatbotUIContext)
 
   const {
@@ -217,12 +221,22 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         </div>
 
         <>
-          <IconCirclePlus
-            className="absolute bottom-[12px] left-3 cursor-pointer p-1 hover:opacity-50"
-            size={32}
-            onClick={() => fileInputRef.current?.click()}
-          />
+          <div className="absolute bottom-[12px] left-3 flex gap-2">
+            <IconCirclePlus
+              className="cursor-pointer p-1 hover:opacity-50"
+              size={32}
+              onClick={() => fileInputRef.current?.click()}
+            />
 
+            <IconMessagePlus
+              className={cn(
+                "cursor-pointer p-1 hover:opacity-50",
+                isOneMore && "bg-white"
+              )}
+              size={32}
+              onClick={() => setIsOneMore(!isOneMore)}
+            />
+          </div>
           {/* Hidden input to select files from device */}
           <Input
             ref={fileInputRef}
@@ -238,7 +252,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
 
         <TextareaAutosize
           textareaRef={chatInputRef}
-          className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md flex w-full resize-none rounded-md border-none bg-transparent px-14 py-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md mx-10 flex w-full resize-none rounded-md border-none bg-transparent px-16 py-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={t(
             // `Ask anything. Type "@" for assistants, "/" for prompts, "#" for files, and "!" for tools.`
             `Ask anything. Type @  /  #  !`

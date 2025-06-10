@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     let allRouteMaps = {}
     let schemaDetails = []
 
+    // Tool-schema pre-processing
     for (const selectedTool of selectedTools) {
       try {
         const convertedSchema = await openapiToFunctions(
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
         console.error("Error converting schema", error)
       }
     }
-
+    // First chat invocation, replaced to python backend instead
     const firstResponse = await openai.chat.completions.create({
       model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
       messages,
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
     const message = firstResponse.choices[0].message
     messages.push(message)
     const toolCalls = message.tool_calls || []
-
+    // Return the response if no tools
     if (toolCalls.length === 0) {
       return new Response(message.content, {
         headers: {

@@ -88,6 +88,7 @@ export const createTempMessages = (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   selectedAssistant: Tables<"assistants"> | null
 ) => {
+  // Temporary placeholders for messages
   let tempUserChatMessage: ChatMessage = {
     message: {
       chat_id: "",
@@ -124,6 +125,7 @@ export const createTempMessages = (
 
   let newMessages = []
 
+  // If it is a regeneration, Clear the content of the last assistant message.
   if (isRegeneration) {
     const lastMessageIndex = chatMessages.length - 1
     chatMessages[lastMessageIndex].message.content = ""
@@ -144,6 +146,7 @@ export const createTempMessages = (
   }
 }
 
+// Perhaps using Ollama in the future?
 export const handleLocalChat = async (
   payload: ChatPayload,
   profile: Tables<"profiles">,
@@ -156,6 +159,7 @@ export const handleLocalChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>
 ) => {
+  console.log("local")
   const formattedMessages = await buildFinalMessages(payload, profile, [])
 
   // Ollama API: https://github.com/jmorganca/ollama/blob/main/docs/api.md
@@ -174,6 +178,7 @@ export const handleLocalChat = async (
     setChatMessages
   )
 
+  // Process Streaming Response
   return await processResponse(
     response,
     isRegeneration
@@ -187,6 +192,7 @@ export const handleLocalChat = async (
   )
 }
 
+// likely the only one we need
 export const handleHostedChat = async (
   payload: ChatPayload,
   profile: Tables<"profiles">,
@@ -199,7 +205,8 @@ export const handleHostedChat = async (
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   setFirstTokenReceived: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setToolInUse: React.Dispatch<React.SetStateAction<string>>
+  setToolInUse: React.Dispatch<React.SetStateAction<string>>,
+  isOneMore: boolean
 ) => {
   const provider =
     modelData.provider === "openai" && profile.use_azure_openai
@@ -208,16 +215,23 @@ export const handleHostedChat = async (
 
   let draftMessages = await buildFinalMessages(payload, profile, chatImages)
 
-  let formattedMessages : any[] = []
+  // If using gemini, the message should be formatted
+  let formattedMessages: any[] = []
   if (provider === "google") {
-    formattedMessages = await adaptMessagesForGoogleGemini(payload, draftMessages)
+    formattedMessages = await adaptMessagesForGoogleGemini(
+      payload,
+      draftMessages
+    )
   } else {
     formattedMessages = draftMessages
   }
 
+  const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL as string
+  //const apiEndpoint =
+  //  provider === "custom" ? "/api/chat/custom" : `/api/chat/${provider}`
   const apiEndpoint =
-    provider === "custom" ? "/api/chat/custom" : `/api/chat/${provider}`
-
+    BACKEND + (isOneMore ? "/onemore_question/" : "/analyse_question/")
+  console.log("apiEndpoint", apiEndpoint)
   const requestBody = {
     chatSettings: payload.chatSettings,
     messages: formattedMessages,
@@ -257,9 +271,10 @@ export const fetchChatResponse = async (
   const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(body),
-    signal: controller.signal
+    signal: controller.signal // allows the request to be aborted
   })
 
+  // request failed
   if (!response.ok) {
     if (response.status === 404 && !isHosted) {
       toast.error(
@@ -272,6 +287,7 @@ export const fetchChatResponse = async (
     toast.error(errorData.message)
 
     setIsGenerating(false)
+    // Remove the last two messages
     setChatMessages(prevMessages => prevMessages.slice(0, -2))
   }
 

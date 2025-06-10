@@ -4,6 +4,8 @@ import mammoth from "mammoth"
 import { toast } from "sonner"
 import { uploadFile } from "./storage/files"
 
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export const getFileById = async (fileId: string) => {
   const { data: file, error } = await supabase
     .from("files")
@@ -94,7 +96,10 @@ export const createFile = async (
   let validFilename = fileRecord.name.replace(/[^a-z0-9.]/gi, "_").toLowerCase()
   const extension = file.name.split(".").pop()
   const extensionIndex = validFilename.lastIndexOf(".")
-  const baseName = validFilename.substring(0, (extensionIndex < 0) ? undefined : extensionIndex)
+  const baseName = validFilename.substring(
+    0,
+    extensionIndex < 0 ? undefined : extensionIndex
+  )
   const maxBaseNameLength = 100 - (extension?.length || 0) - 1
   if (baseName.length > maxBaseNameLength) {
     fileRecord.name = baseName.substring(0, maxBaseNameLength) + "." + extension

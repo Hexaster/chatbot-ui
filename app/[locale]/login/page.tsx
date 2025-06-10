@@ -17,8 +17,10 @@ export const metadata: Metadata = {
 export default async function Login({
   searchParams
 }: {
-  searchParams: { message: string }
+  searchParams: { message: string } // Sending messages
 }) {
+  // Check if the user has already logged in
+  // Initialise a supabase server
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,12 +36,13 @@ export default async function Login({
   const session = (await supabase.auth.getSession()).data.session
 
   if (session) {
+    // A supabase query
     const { data: homeWorkspace, error } = await supabase
       .from("workspaces")
       .select("*")
       .eq("user_id", session.user.id)
       .eq("is_home", true)
-      .single()
+      .single() // Mage sure that the user is unique
 
     if (!homeWorkspace) {
       throw new Error(error.message)
@@ -84,10 +87,10 @@ export default async function Login({
   const getEnvVarOrEdgeConfigValue = async (name: string) => {
     "use server"
     if (process.env.EDGE_CONFIG) {
-      return await get<string>(name)
+      return await get<string>(name) // use this on cloud
     }
 
-    return process.env[name]
+    return process.env[name] // use this on localhost
   }
 
   const signUp = async (formData: FormData) => {
@@ -118,10 +121,14 @@ export default async function Login({
         )
       }
     }
-
+    // Create a Supabase client associated with the user's cookie (session).
+    //
+    // (But nothing stored yet. Still setting up the tool.)
     const cookieStore = cookies()
     const supabase = createClient(cookieStore)
 
+    //Now actually perform the signup:
+    //Register the email and password with Supabase's Auth service
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -136,6 +143,7 @@ export default async function Login({
       return redirect(`/login?message=${error.message}`)
     }
 
+    // Instead of entering the home page, redirecting to /setup/
     return redirect("/setup")
 
     // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
@@ -167,8 +175,7 @@ export default async function Login({
         className="animate-in text-foreground flex w-full flex-1 flex-col justify-center gap-2"
         action={signIn}
       >
-        <Brand />
-
+        <Brand /> {/* The clickable logo */}
         <Label className="text-md mt-4" htmlFor="email">
           Email
         </Label>
@@ -178,7 +185,6 @@ export default async function Login({
           placeholder="you@example.com"
           required
         />
-
         <Label className="text-md" htmlFor="password">
           Password
         </Label>
@@ -188,18 +194,15 @@ export default async function Login({
           name="password"
           placeholder="••••••••"
         />
-
         <SubmitButton className="mb-2 rounded-md bg-blue-700 px-4 py-2 text-white">
           Login
         </SubmitButton>
-
         <SubmitButton
           formAction={signUp}
           className="border-foreground/20 mb-2 rounded-md border px-4 py-2"
         >
           Sign Up
         </SubmitButton>
-
         <div className="text-muted-foreground mt-1 flex justify-center text-sm">
           <span className="mr-1">Forgot your password?</span>
           <button
@@ -209,7 +212,6 @@ export default async function Login({
             Reset
           </button>
         </div>
-
         {searchParams?.message && (
           <p className="bg-foreground/10 text-foreground mt-4 p-4 text-center">
             {searchParams.message}

@@ -194,6 +194,7 @@ export const Message: FC<MessageProps> = ({
           <MessageActions
             onCopy={handleCopy}
             onEdit={handleStartEdit}
+            onOneMore={handleCopy} // To be modified
             isAssistant={message.role === "assistant"}
             isLast={isLast}
             isEditing={isEditing}

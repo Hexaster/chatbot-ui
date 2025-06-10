@@ -86,6 +86,8 @@ interface ChatbotUIContext {
   setFirstTokenReceived: Dispatch<SetStateAction<boolean>>
   isGenerating: boolean
   setIsGenerating: Dispatch<SetStateAction<boolean>>
+  isOneMore: boolean // Added for the onemore button
+  setIsOneMore: Dispatch<SetStateAction<boolean>>
 
   // CHAT INPUT COMMAND STORE
   isPromptPickerOpen: boolean
@@ -212,6 +214,8 @@ export const ChatbotUIContext = createContext<ChatbotUIContext>({
   setFirstTokenReceived: () => {},
   abortController: null,
   setAbortController: () => {},
+  isOneMore: false,
+  setIsOneMore: () => {},
 
   // CHAT INPUT COMMAND STORE
   isPromptPickerOpen: false,

@@ -1,5 +1,6 @@
 import { ChatbotUIContext } from "@/context/context"
 import { IconCheck, IconCopy, IconEdit, IconRepeat } from "@tabler/icons-react"
+import { IconMessagePlus } from "@tabler/icons-react" // Icon for OneMore button
 import { FC, useContext, useEffect, useState } from "react"
 import { WithTooltip } from "../ui/with-tooltip"
 
@@ -12,6 +13,7 @@ interface MessageActionsProps {
   isHovering: boolean
   onCopy: () => void
   onEdit: () => void
+  onOneMore: () => void
   onRegenerate: () => void
 }
 
@@ -22,6 +24,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
   isHovering,
   onCopy,
   onEdit,
+  onOneMore,
   onRegenerate
 }) => {
   const { isGenerating } = useContext(ChatbotUIContext)
@@ -63,18 +66,33 @@ export const MessageActions: FC<MessageActionsProps> = ({
       )} */}
 
       {!isAssistant && isHovering && (
-        <WithTooltip
-          delayDuration={1000}
-          side="bottom"
-          display={<div>Edit</div>}
-          trigger={
-            <IconEdit
-              className="cursor-pointer hover:opacity-50"
-              size={MESSAGE_ICON_SIZE}
-              onClick={onEdit}
-            />
-          }
-        />
+        <>
+          <WithTooltip
+            delayDuration={1000}
+            side="bottom"
+            display={<div>Edit</div>}
+            trigger={
+              <IconEdit
+                className="cursor-pointer hover:opacity-50"
+                size={MESSAGE_ICON_SIZE}
+                onClick={onEdit}
+              />
+            }
+          />
+
+          <WithTooltip
+            delayDuration={1000}
+            side="bottom"
+            display={<div>OneMore</div>}
+            trigger={
+              <IconMessagePlus
+                className="cursor-pointer hover:opacity-50"
+                size={MESSAGE_ICON_SIZE}
+                onClick={onOneMore}
+              />
+            }
+          />
+        </>
       )}
 
       {(isHovering || isLast) && (

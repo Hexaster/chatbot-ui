@@ -25,9 +25,14 @@ interface WorkspaceLayoutProps {
 }
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
+  // used for router.push, router.back, router.refresh, etc.
   const router = useRouter()
 
+  // Gets params of the url
+  // for [workspaceid]/chat/[chatid], the params will be;
+  // params.workspaceid, params.chatid
   const params = useParams()
+  // query the part of url with ?key=value
   const searchParams = useSearchParams()
   const workspaceId = params.workspaceid as string
 
@@ -156,6 +161,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     const modelData = await getModelWorkspacesByWorkspaceId(workspaceId)
     setModels(modelData.models)
 
+    // This can be fixed or only controlled by the admin
     setChatSettings({
       model: (searchParams.get("model") ||
         workspace?.default_model ||

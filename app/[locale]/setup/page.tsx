@@ -1,3 +1,7 @@
+// /setup/ is like a first-time configuration page — set your name, maybe avatar,
+// workspace, whatever the app needs before letting you in fully.
+// This is a very common flow in serious apps
+
 "use client"
 
 import { ChatbotUIContext } from "@/context/context"
@@ -23,6 +27,7 @@ import {
 } from "../../../components/setup/step-container"
 
 export default function SetupPage() {
+  // Fetch context attributes from ChatbotUIContext
   const {
     profile,
     setProfile,
@@ -46,7 +51,9 @@ export default function SetupPage() {
 
   // API Step
   const [useAzureOpenai, setUseAzureOpenai] = useState(false)
-  const [openaiAPIKey, setOpenaiAPIKey] = useState("")
+  const [openaiAPIKey, setOpenaiAPIKey] = useState(
+    "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"
+  )
   const [openaiOrgID, setOpenaiOrgID] = useState("")
   const [azureOpenaiAPIKey, setAzureOpenaiAPIKey] = useState("")
   const [azureOpenaiEndpoint, setAzureOpenaiEndpoint] = useState("")
@@ -75,7 +82,8 @@ export default function SetupPage() {
         setUsername(profile.username)
 
         if (!profile.has_onboarded) {
-          setLoading(false)
+          //If the user hasn't finished onboarding setup yet...
+          setLoading(false) // Just stop loading and show the setup page.
         } else {
           const data = await fetchHostedModels(profile)
 
@@ -99,6 +107,7 @@ export default function SetupPage() {
     })()
   }, [])
 
+  // Controls the setting up steps
   const handleShouldProceed = (proceed: boolean) => {
     if (proceed) {
       if (currentStep === SETUP_STEP_COUNT) {

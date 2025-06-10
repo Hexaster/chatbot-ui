@@ -110,6 +110,7 @@ export async function POST(req: Request) {
     } else {
       openai = new OpenAI({
         apiKey: profile.openai_api_key || "",
+        baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
         organization: profile.openai_organization_id
       })
     }
