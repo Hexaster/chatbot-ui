@@ -10,7 +10,7 @@ import { Tables } from "@/supabase/types"
 import { ChatMessage, ChatPayload, LLMID, ModelProvider } from "@/types"
 import { useRouter } from "next/navigation"
 import { useContext, useEffect, useRef } from "react"
-import { LLM_LIST } from "../../../lib/models/llm/llm-list"
+import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import {
   createTempMessages,
   handleCreateChat,
@@ -201,8 +201,6 @@ export const useChatHandler = () => {
     chatMessages: ChatMessage[], // Chat history
     isRegeneration: boolean // whether a re-sent or not
   ) => {
-    const startingInput = messageContent
-
     try {
       setUserInput("") // clear input box
       setIsGenerating(true) // Tell UI that AI is now "thinking" (show loading spinner etc.)
@@ -399,7 +397,7 @@ export const useChatHandler = () => {
     } catch (error) {
       setIsGenerating(false)
       setFirstTokenReceived(false)
-      setUserInput(startingInput)
+      setUserInput(messageContent)
     }
   }
 
@@ -421,7 +419,7 @@ export const useChatHandler = () => {
 
     setChatMessages(filteredMessages)
 
-    handleSendMessage(editedContent, filteredMessages, false)
+    await handleSendMessage(editedContent, filteredMessages, false)
   }
 
   return {
