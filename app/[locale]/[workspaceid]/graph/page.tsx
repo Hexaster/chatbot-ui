@@ -2,33 +2,23 @@
 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch"
 import Image from "next/image"
+import Neo4jGraph from "@/components/graph/Neo4jGraph"
 
 const graph = () => {
+  const nodes = [
+    { id: "1", label: "Node 1", caption: "Andrew" },
+    { id: "2", label: "Node 2", caption: "Ellen" }
+  ]
+  const relationships = [{ id: "12", from: "1", to: "2", caption: "loves" }]
+  const options = { initialZoom: 1.0 }
   return (
-    <div className="relative h-screen w-full">
-      <TransformWrapper
-        initialScale={1}
-        minScale={0.5}
-        maxScale={4}
-        wheel={{ step: 0.1 }}
-        doubleClick={{ disabled: true }}
-        pinch={{ step: 5 }}
-        panning={{ velocityDisabled: true }}
-      >
-        <TransformComponent
-          wrapperStyle={{ width: "100%", height: "100%" }}
-          contentStyle={{ width: "100%", height: "100%" }}
-        >
-          <Image
-            src="/images/graph.png"
-            alt="Knowledge graph"
-            layout="fill"
-            style={{ objectFit: "contain" }}
-            sizes="100vw"
-            priority
-          />
-        </TransformComponent>
-      </TransformWrapper>
+    <div className="relative h-screen w-full" id="frame">
+      <h1>Neo4j NVL Demo in Next.js</h1>
+      <Neo4jGraph
+        nodes={nodes}
+        relationships={relationships}
+        options={options}
+      />
     </div>
   )
 }
