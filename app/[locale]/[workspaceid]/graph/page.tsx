@@ -1,5 +1,4 @@
 "use client"
-import Neo4jGraph from "@/components/graph/Neo4jGraph"
 import { executeQuery } from "@/lib/Graph/Neo4jConnect"
 import { useEffect, useState } from "react"
 import Neo4jGraphClient from "@/components/graph/Neo4jGraphClient"
@@ -50,6 +49,10 @@ const Graph = () => {
     ) => console.log("onRelationshipRightClick", rel, hitTargets, evt),
     onNodeClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
       console.log("onNodeClick", node, hitTargets, evt)
+      const newNodes = nodes.map((oldNode: Node) =>
+        oldNode.id === node.id ? { ...oldNode, color: "green" } : oldNode
+      )
+      setNodes(newNodes)
     },
     onNodeRightClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) =>
       console.log("onNodeRightClick", node, hitTargets, evt),
