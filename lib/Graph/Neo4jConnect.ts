@@ -9,33 +9,14 @@ let driver
 export const executeQuery = async (query: string) => {
   try {
     driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD))
-    const data = await driver.executeQuery(
+    return await driver.executeQuery(
       query,
       {},
       { resultTransformer: nvlResultTransformer }
     )
-
-    // Customise nodes and relationships
-    const nodes = data.nodes.map((node: { id: any }) => {
-      const { properties, labels } = data.recordObjectMap.get(node.id)
-      return {
-        ...node,
-        caption: properties.name ?? properties.title,
-        color: labels[0] === "Content" ? "red" : "blue"
-      }
-    })
-
-    const relationships = data.relationships.map((relation: { id: any }) => {
-      const or = data.recordObjectMap.get(relation.id)
-      return {
-        ...relation,
-        caption: or.type
-      }
-    })
-    return { nodes, relationships }
   } catch (err) {
     // @ts-ignore
     console.log(`Connection error\n${err}\nCause: ${err.cause}`)
-    return { nodes: [], relationships: [] }
+    return null
   }
 }
