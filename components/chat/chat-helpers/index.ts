@@ -270,10 +270,13 @@ export const fetchChatResponse = async (
 ) => {
   const response = await fetch(url, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json" // <--- this is critical!
+    },
     body: JSON.stringify(body),
     signal: controller.signal // allows the request to be aborted
   })
-
+  console.log(JSON.stringify(body))
   // request failed
   if (!response.ok) {
     if (response.status === 404 && !isHosted) {

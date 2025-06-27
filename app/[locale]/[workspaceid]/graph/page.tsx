@@ -4,35 +4,48 @@ import { useEffect, useState } from "react"
 import Neo4jGraphClient from "@/components/graph/Neo4jGraphClient"
 import { type HitTargets, Node, Relationship } from "@neo4j-nvl/base"
 import type { MouseEventCallbacks } from "@neo4j-nvl/react"
+import { supabase } from "@/lib/supabase/browser-client"
+import { getDomainByUserId } from "@/db/domain"
 
 const Graph = () => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [relationships, setRelationships] = useState<Relationship[]>([])
 
   useEffect(() => {
-    executeQuery("MATCH p=()-[]->() RETURN p;")
-      .then(result => {
-        console.log(result)
-        const styledNodes = result.nodes.map((node: Node) => {
-          const { properties, labels } = result.recordObjectMap.get(node.id)
-          return {
-            ...node,
-            caption: properties.name ?? properties.title,
-            color: labels[0] === "Content" ? "red" : "blue"
-          }
-        })
-        setNodes(styledNodes)
+    ;(async () => {
+      const session = (await supabase.auth.getSession()).data.session
+      const studiedDomains = await getDomainByUserId(session.user.id)
+      const studiedSet = new Set(studiedDomains.map(d => d.domain_id))
+      console.log("studiedDomains: ", studiedSet)
 
-        const styledRels = result?.relationships.map((rel: Relationship) => {
-          const or = result?.recordObjectMap.get(rel.id)
-          return {
-            ...rel,
-            caption: or.type
-          }
+      executeQuery("MATCH p=()-[]->() RETURN p;")
+        .then(result => {
+          console.log(result)
+          const styledNodes = result.nodes.map((node: Node) => {
+            const { properties, labels } = result.recordObjectMap.get(node.id)
+            let color = "blue"
+            if (labels[0] === "Content") {
+              color = studiedSet.has(node.id) ? "green" : "red"
+            }
+            return {
+              ...node,
+              caption: properties.name,
+              color: color
+            }
+          })
+          setNodes(styledNodes)
+
+          const styledRels = result?.relationships.map((rel: Relationship) => {
+            const or = result?.recordObjectMap.get(rel.id)
+            return {
+              ...rel,
+              caption: or.type
+            }
+          })
+          setRelationships(styledRels)
         })
-        setRelationships(styledRels)
-      })
-      .catch(console.error)
+        .catch(console.error)
+    })()
   }, [])
 
   const mouseEventCallbacks: MouseEventCallbacks = {
