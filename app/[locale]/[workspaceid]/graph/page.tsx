@@ -15,7 +15,7 @@ const Graph = () => {
     ;(async () => {
       const session = (await supabase.auth.getSession()).data.session
       const studiedDomains = await getDomainByUserId(session.user.id)
-      const studiedSet = new Set(studiedDomains.map(d => d.domain_id))
+      const studiedSet = new Set()
       console.log("studiedDomains: ", studiedSet)
 
       executeQuery("MATCH p=()-[]->() RETURN p;")
@@ -62,10 +62,6 @@ const Graph = () => {
     ) => console.log("onRelationshipRightClick", rel, hitTargets, evt),
     onNodeClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
       console.log("onNodeClick", node, hitTargets, evt)
-      const newNodes = nodes.map((oldNode: Node) =>
-        oldNode.id === node.id ? { ...oldNode, color: "green" } : oldNode
-      )
-      setNodes(newNodes)
     },
     onNodeRightClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) =>
       console.log("onNodeRightClick", node, hitTargets, evt),

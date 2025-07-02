@@ -22,7 +22,6 @@ export async function POST(request: Request) {
     )
 
     const profile = await getServerProfile()
-
     if (embeddingsProvider === "openai") {
       if (profile.use_azure_openai) {
         checkApiKey(profile.azure_openai_api_key, "Azure OpenAI")
@@ -30,7 +29,6 @@ export async function POST(request: Request) {
         checkApiKey(profile.openai_api_key, "OpenAI")
       }
     }
-
     let chunks: any[] = []
 
     let openai
@@ -44,25 +42,22 @@ export async function POST(request: Request) {
     } else {
       openai = new OpenAI({
         apiKey: profile.openai_api_key || "",
+        baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
         organization: profile.openai_organization_id
       })
     }
-
     if (embeddingsProvider === "openai") {
       const response = await openai.embeddings.create({
         model: "text-embedding-3-small",
         input: userInput
       })
-
       const openaiEmbedding = response.data.map(item => item.embedding)[0]
-
       const { data: openaiFileItems, error: openaiError } =
         await supabaseAdmin.rpc("match_file_items_openai", {
           query_embedding: openaiEmbedding as any,
           match_count: sourceCount,
           file_ids: uniqueFileIds
         })
-
       if (openaiError) {
         throw openaiError
       }
