@@ -15,7 +15,7 @@ const Graph = () => {
     ;(async () => {
       const session = (await supabase.auth.getSession()).data.session
       const studiedDomains = await getDomainByUserId(session.user.id)
-      const studiedSet = new Set()
+      const studiedSet = new Set(studiedDomains.map(d => d.domain_id))
       console.log("studiedDomains: ", studiedSet)
 
       executeQuery("MATCH p=()-[]->() RETURN p;")
