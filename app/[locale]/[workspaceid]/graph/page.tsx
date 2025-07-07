@@ -6,6 +6,7 @@ import { type HitTargets, Node, Relationship } from "@neo4j-nvl/base"
 import type { MouseEventCallbacks } from "@neo4j-nvl/react"
 import { supabase } from "@/lib/supabase/browser-client"
 import { getDomainByUserId } from "@/db/domain"
+import dynamic from "next/dynamic"
 
 const Graph = () => {
   const [nodes, setNodes] = useState<Node[]>([])

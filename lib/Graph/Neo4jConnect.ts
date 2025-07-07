@@ -1,3 +1,4 @@
+"use client"
 import { nvlResultTransformer } from "@neo4j-nvl/base"
 
 let neo4j = require("neo4j-driver")

@@ -129,7 +129,7 @@ export default async function Login({
 
     //Now actually perform the signup:
     //Register the email and password with Supabase's Auth service
-    const { error } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -138,9 +138,18 @@ export default async function Login({
       }
     })
 
-    if (error) {
-      console.error(error)
-      return redirect(`/login?message=${error.message}`)
+    // Add user description
+    const { error: descriptionError } = await supabase
+      .from("user_description")
+      .insert({ id: data.user?.id })
+    if (descriptionError) {
+      console.error(descriptionError)
+    }
+
+    const err = [signUpError, descriptionError].find(Boolean)
+    if (err) {
+      console.error(err)
+      return redirect(`/login?message=${encodeURIComponent(err.message)}`)
     }
 
     // Instead of entering the home page, redirecting to /setup/
