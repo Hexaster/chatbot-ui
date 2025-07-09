@@ -22,6 +22,7 @@ import {
 import React from "react"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
+import { supabase } from "@/lib/supabase/browser-client"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -231,7 +232,6 @@ export const handleHostedChat = async (
   //  provider === "custom" ? "/api/chat/custom" : `/api/chat/${provider}`
   const apiEndpoint =
     BACKEND + (isOneMore ? "/onemore_question/" : "/analyse_question/")
-  console.log("apiEndpoint", apiEndpoint)
   const requestBody = {
     chatSettings: payload.chatSettings,
     messages: formattedMessages,
@@ -268,15 +268,21 @@ export const fetchChatResponse = async (
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
 ) => {
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
+  const accessToken = session?.access_token
+  console.log(session)
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json" // <--- this is critical!
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json", // <--- this is critical!
+      Accept: "application/json"
     },
     body: JSON.stringify(body),
     signal: controller.signal // allows the request to be aborted
   })
-  console.log(JSON.stringify(body))
   // request failed
   if (!response.ok) {
     if (response.status === 404 && !isHosted) {
