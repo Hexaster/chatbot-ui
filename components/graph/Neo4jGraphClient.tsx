@@ -1,16 +1,4 @@
-"use client"
-import { useRef, useEffect, useState } from "react"
-import type {
-  ExternalCallbacks,
-  HitTargets,
-  Layout,
-  Node,
-  NvlOptions,
-  Relationship
-} from "@neo4j-nvl/base"
-
 import { InteractiveNvlWrapper } from "@neo4j-nvl/react"
-import type { MouseEventCallbacks } from "@neo4j-nvl/react"
 import type { InteractiveNvlWrapperProps } from "@neo4j-nvl/react"
 
 export default function Neo4jGraphClient({

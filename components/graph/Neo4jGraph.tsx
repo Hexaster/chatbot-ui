@@ -8,7 +8,7 @@ const Neo4jGraphClient = dynamic(() => import("./Neo4jGraphClient"), {
 export default function Neo4jGraph(
   props: JSX.IntrinsicAttributes & {
     nodes: any[]
-    relationships: any[]
+    rels: any[]
   }
 ) {
   return <Neo4jGraphClient {...props} />
